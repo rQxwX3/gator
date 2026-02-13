@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/rQxwX3/gator/internal/config"
 )
 
@@ -13,38 +14,31 @@ type command struct {
 	arguments []string
 }
 
+type cmdhandler func(*state, command) error
+type cmdmap map[string]cmdhandler
+
 type commands struct {
-	cmdMap map[string]func(*state, command) error
+	cmdmap cmdmap
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	cmdHandler := c.cmdMap[cmd.name]
+	handler, ok := c.cmdmap[cmd.name]
+	if !ok {
+		return errors.New(cmd.name + " is not a registered command")
+	}
 
-	if err := cmdHandler(s, cmd); err != nil {
+	err := handler(s, cmd)
+	if err != nil {
 		return err
 	}
 
 	return nil
 }
 
+func (c *commands) register(name string, f cmdhandler) error {
+	if _, ok := c.cmdmap[name]; !ok {
+		c.cmdmap[name] = f
+	}
 
-
-// import (
-// 	"errors"
-// 	"fmt"
-// 	"github.com/rQxwX3/gator/internal/types"
-// )
-//
-// func handlerLogin(s *types.State, cmd types.Command) error {
-// 	if len(cmd.Arguments) != 1 {
-// 		return errors.New("The login command expects the username argument")
-// 	}
-//
-// 	username := cmd.Arguments[0]
-//
-// 	s.Conf.SetUser(username)
-//
-// 	fmt.Println("Username was successfully set to:", username)
-//
-// 	return nil
-// }
+	return nil
+}
