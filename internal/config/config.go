@@ -52,20 +52,10 @@ func Read() (Config, error) {
 	return config, nil
 }
 
-func SetUser(username string) error {
-	data, err := getConfigData()
-	if err != nil {
-		return err
-	}
+func (c *Config) SetUser(username string) error {
+	c.CurrentUserName = username
 
-	var config Config
-	if err = json.Unmarshal(data, &config); err != nil {
-		return err
-	}
-
-	config.CurrentUserName = username
-
-	data, err = json.Marshal(config)
+	data, err := json.Marshal(c)
 	if err != nil {
 		return err
 	}
