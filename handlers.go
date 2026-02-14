@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/rQxwX3/gator/internal/database"
+	"github.com/rQxwX3/gator/internal/rss"
 	"os"
 	"time"
 )
@@ -95,6 +96,21 @@ func handlerUsers(s *state, cmd command) error {
 
 		fmt.Print("\n")
 	}
+
+	return nil
+}
+
+func handlerAgg(s *state, cmd command) error {
+	if len(cmd.arguments) != 0 {
+		return errors.New("Agg command does not take any arguments")
+	}
+
+	feed, err := rss.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(feed)
 
 	return nil
 }
