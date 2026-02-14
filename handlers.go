@@ -122,7 +122,7 @@ func handlerAddFeed(s *state, cmd command) error {
 
 	user, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	currentTime := time.Now()
@@ -139,14 +139,13 @@ func handlerAddFeed(s *state, cmd command) error {
 		return err
 	}
 
-	err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+	_, err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: currentTime,
 		UpdatedAt: currentTime,
 		FeedID:    feed.ID,
 		UserID:    user.ID,
 	})
-
 	if err != nil {
 		return err
 	}
@@ -187,15 +186,17 @@ func handlerFollow(s *state, cmd command) error {
 
 	feed, err := s.db.GetFeedByURL(context.Background(), cmd.arguments[0])
 	if err != nil {
+		fmt.Println("no feed")
 		return err
 	}
 
 	user, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
 	if err != nil {
+		fmt.Println("no user")
 		return err
 	}
 
-	err = s.db.CreateFeedFollow(context.Background(),
+	_, err = s.db.CreateFeedFollow(context.Background(),
 		database.CreateFeedFollowParams{
 			ID:        uuid.New(),
 			CreatedAt: currentTime,
@@ -224,7 +225,7 @@ func handlerFollowing(s *state, cmd command) error {
 	}
 
 	for _, feedFollow := range feedFollows {
-		fmt.Println(feedFollow.Feedname)
+		fmt.Println(feedFollow.ID, feedFollow.FeedName)
 	}
 
 	return nil
