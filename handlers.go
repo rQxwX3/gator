@@ -200,3 +200,21 @@ func handlerFollow(s *state, cmd command) error {
 
 	return nil
 }
+
+func handlerFollowing(s *state, cmd command) error {
+	if len(cmd.arguments) != 0 {
+		return errors.New("The following command does not take any arguments")
+	}
+
+	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(),
+		s.conf.CurrentUserName)
+	if err != nil {
+		return err
+	}
+
+	for _, feedFollow := range feedFollows {
+		fmt.Println(feedFollow.Feedname)
+	}
+
+	return nil
+}

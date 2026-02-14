@@ -11,3 +11,10 @@ VALUES (
 	JOIN users ON feed_follows.user_id = users.id 
 	JOIN feeds ON feed_follows.feed_id = feeds.id 
 );
+
+-- name: GetFeedFollowsForUser :many
+SELECT *, feeds.name AS feedName, users.name AS userName
+FROM feed_follows
+JOIN users ON feed_follows.user_id = users.id
+JOIN feeds ON feed_follows.feed_id = feeds.id
+WHERE users.name = $1;
