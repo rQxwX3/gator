@@ -19,7 +19,7 @@ func handlerLogin(s *state, cmd command) error {
 
 	name := cmd.arguments[0]
 
-	_, err := s.db.GetUser(context.Background(), name)
+	_, err := s.db.GetUserByName(context.Background(), name)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -38,7 +38,7 @@ func handlerRegister(s *state, cmd command) error {
 
 	name := cmd.arguments[0]
 
-	_, err := s.db.GetUser(context.Background(), name)
+	_, err := s.db.GetUserByName(context.Background(), name)
 	if err != sql.ErrNoRows {
 		os.Exit(1)
 	}
@@ -120,7 +120,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		return errors.New("The addfeed command requires name and URL arguments")
 	}
 
-	currentUser, err := s.db.GetUser(context.Background(), s.conf.CurrentUserName)
+	currentUser, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
 	if err != nil {
 		return nil
 	}
@@ -141,6 +141,28 @@ func handlerAddFeed(s *state, cmd command) error {
 	}
 
 	fmt.Println(feed)
+
+	return nil
+}
+
+func handlerFeeds(s *state, cmd command) error {
+	if len(cmd.arguments) != 0 {
+		return errors.New("The feeds command does not take any arguments")
+	}
+
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, feed := range feeds {
+		user, err := s.db.GetUserByID(context.Background(), feed.UserID)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(feed.Name, feed.Url, user.Name)
+	}
 
 	return nil
 }
