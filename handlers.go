@@ -166,3 +166,37 @@ func handlerFeeds(s *state, cmd command) error {
 
 	return nil
 }
+
+func handlerFollow(s *state, cmd command) error {
+	if len(cmd.arguments) != 1 {
+		return errors.New("The follow command requires url to feed argument")
+	}
+
+	currentTime := time.Now()
+
+	feed, err := s.db.GetFeedByURL(context.Background(), cmd.arguments[0])
+	if err != nil {
+		return err
+	}
+
+	user, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
+	if err != nil {
+		return err
+	}
+
+	err = s.db.CreateFeedFollow(context.Background(),
+		database.CreateFeedFollowParams{
+			ID:        uuid.New(),
+			CreatedAt: currentTime,
+			UpdatedAt: currentTime,
+			FeedID:    feed.ID,
+			UserID:    user.ID,
+		})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(user.ID, "is now subscribed to", feed.Name, "feed")
+
+	return nil
+}
