@@ -120,7 +120,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		return errors.New("The addfeed command requires name and URL arguments")
 	}
 
-	currentUser, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
+	user, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
 	if err != nil {
 		return nil
 	}
@@ -133,7 +133,18 @@ func handlerAddFeed(s *state, cmd command) error {
 		UpdatedAt: currentTime,
 		Name:      cmd.arguments[0],
 		Url:       cmd.arguments[1],
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: currentTime,
+		UpdatedAt: currentTime,
+		FeedID:    feed.ID,
+		UserID:    user.ID,
 	})
 
 	if err != nil {
