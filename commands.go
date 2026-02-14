@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"github.com/rQxwX3/gator/internal/config"
+	"github.com/rQxwX3/gator/internal/database"
 )
 
 type state struct {
 	conf *config.Config
+	db   *database.Queries
 }
 
 type command struct {
