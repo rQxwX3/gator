@@ -14,7 +14,7 @@ import (
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.arguments) != 1 {
-		return errors.New("The login command expects the username argument")
+		return errors.New("The login command requires username argument")
 	}
 
 	name := cmd.arguments[0]
@@ -33,7 +33,7 @@ func handlerLogin(s *state, cmd command) error {
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.arguments) != 1 {
-		return errors.New("The register command expects the username argument")
+		return errors.New("The register command requires username argument")
 	}
 
 	name := cmd.arguments[0]
@@ -66,7 +66,7 @@ func handlerRegister(s *state, cmd command) error {
 
 func handlerReset(s *state, cmd command) error {
 	if len(cmd.arguments) != 0 {
-		return errors.New("Reset command does not take any arguments")
+		return errors.New("The reset command does not take any arguments")
 	}
 
 	err := s.db.ResetUsers(context.Background())
@@ -79,7 +79,7 @@ func handlerReset(s *state, cmd command) error {
 
 func handlerUsers(s *state, cmd command) error {
 	if len(cmd.arguments) != 0 {
-		return errors.New("Users command does not take any arguments")
+		return errors.New("The users command does not take any arguments")
 	}
 
 	users, err := s.db.GetUsers(context.Background())
@@ -102,10 +102,40 @@ func handlerUsers(s *state, cmd command) error {
 
 func handlerAgg(s *state, cmd command) error {
 	if len(cmd.arguments) != 0 {
-		return errors.New("Agg command does not take any arguments")
+		return errors.New("The agg command does not take any arguments")
 	}
 
 	feed, err := rss.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(feed)
+
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.arguments) != 2 {
+		return errors.New("The addfeed command requires name and URL arguments")
+	}
+
+	currentUser, err := s.db.GetUser(context.Background(), s.conf.CurrentUserName)
+	if err != nil {
+		return nil
+	}
+
+	currentTime := time.Now()
+
+	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: currentTime,
+		UpdatedAt: currentTime,
+		Name:      cmd.arguments[0],
+		Url:       cmd.arguments[1],
+		UserID:    currentUser.ID,
+	})
+
 	if err != nil {
 		return err
 	}
