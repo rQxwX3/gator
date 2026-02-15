@@ -30,6 +30,7 @@ func main() {
 	commands.register("feeds", handlerFeeds)
 	commands.register("follow", middlewareLoggedIn(handlerFollow))
 	commands.register("following", middlewareLoggedIn(handlerFollowing))
+	commands.register("following", middlewareLoggedIn(handlerUnfollow))
 
 	osArgs := os.Args
 	if len(osArgs) < 2 {

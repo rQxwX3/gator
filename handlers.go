@@ -14,7 +14,7 @@ import (
 
 func handlerLogin(s *state, cmd command) error {
 	if len(cmd.arguments) != 1 {
-		return errors.New("The login command requires username argument")
+		return errors.New("The login command requires user's name as an argument")
 	}
 
 	name := cmd.arguments[0]
@@ -33,7 +33,7 @@ func handlerLogin(s *state, cmd command) error {
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.arguments) != 1 {
-		return errors.New("The register command requires username argument")
+		return errors.New("The register command requires user's name as an argument")
 	}
 
 	name := cmd.arguments[0]
@@ -117,7 +117,9 @@ func handlerAgg(s *state, cmd command) error {
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 2 {
-		return errors.New("The addfeed command requires name and URL arguments")
+		return errors.New(
+			"The addfeed command requires feed's name and URL as arguments",
+		)
 	}
 
 	currentTime := time.Now()
@@ -174,7 +176,7 @@ func handlerFeeds(s *state, cmd command) error {
 
 func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 1 {
-		return errors.New("The follow command requires url to feed argument")
+		return errors.New("The follow command requires feed url as an argument")
 	}
 
 	currentTime := time.Now()
@@ -214,6 +216,27 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 
 	for _, feedFollow := range feedFollows {
 		fmt.Println(feedFollow.ID, feedFollow.FeedName)
+	}
+
+	return nil
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.arguments) != 1 {
+		return errors.New("The unfollow command requires feed's URL as an argument")
+	}
+
+	feed, err := s.db.GetFeedByURL(context.Background(), cmd.arguments[0])
+	if err != nil {
+		return err
+	}
+
+	err = s.db.DeleteFeedFollow(context.Background(), database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	})
+	if err != nil {
+		return err
 	}
 
 	return nil

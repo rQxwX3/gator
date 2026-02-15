@@ -16,8 +16,9 @@ type command struct {
 	arguments []string
 }
 
-type cmdhandler func(*state, command) error
-type cmdmap map[string]cmdhandler
+type handler func(*state, command) error
+type loggedInHandler func(*state, command, database.User) error
+type cmdmap map[string]handler
 
 type commands struct {
 	cmdmap cmdmap
@@ -37,7 +38,7 @@ func (c *commands) run(s *state, cmd command) error {
 	return nil
 }
 
-func (c *commands) register(name string, f cmdhandler) error {
+func (c *commands) register(name string, f handler) error {
 	if _, ok := c.cmdmap[name]; !ok {
 		c.cmdmap[name] = f
 	}
