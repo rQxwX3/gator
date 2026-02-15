@@ -115,14 +115,9 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 2 {
 		return errors.New("The addfeed command requires name and URL arguments")
-	}
-
-	user, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
-	if err != nil {
-		return err
 	}
 
 	currentTime := time.Now()
@@ -177,7 +172,7 @@ func handlerFeeds(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 1 {
 		return errors.New("The follow command requires url to feed argument")
 	}
@@ -187,12 +182,6 @@ func handlerFollow(s *state, cmd command) error {
 	feed, err := s.db.GetFeedByURL(context.Background(), cmd.arguments[0])
 	if err != nil {
 		fmt.Println("no feed")
-		return err
-	}
-
-	user, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
-	if err != nil {
-		fmt.Println("no user")
 		return err
 	}
 
@@ -213,13 +202,12 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	if len(cmd.arguments) != 0 {
 		return errors.New("The following command does not take any arguments")
 	}
 
-	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(),
-		s.conf.CurrentUserName)
+	feedFollows, err := s.db.GetFeedFollowsForUser(context.Background(), user.Name)
 	if err != nil {
 		return err
 	}
