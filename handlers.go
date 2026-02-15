@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rQxwX3/gator/internal/database"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -243,6 +244,38 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 	})
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+	lenArguments := len(cmd.arguments)
+
+	if lenArguments > 1 {
+		return errors.New("The browse takes optional post number limit argument")
+	}
+
+	var limit int32 = 2
+	if lenArguments == 1 {
+		atoiLimit, err := strconv.Atoi(cmd.arguments[0])
+		if err != nil {
+			return err
+		}
+		limit = int32(atoiLimit)
+	}
+
+	posts, err := s.db.GetPostsForUser(context.Background(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  limit,
+	})
+	if err != nil {
+		return nil
+	}
+
+	for _, post := range posts {
+		fmt.Println(post.Title, post.PublishedAt)
+		fmt.Println(post.Description)
 	}
 
 	return nil
