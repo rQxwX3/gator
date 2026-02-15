@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/rQxwX3/gator/internal/database"
-	"github.com/rQxwX3/gator/internal/rss"
 	"os"
 	"time"
 )
@@ -110,7 +109,7 @@ func handlerAgg(s *state, cmd command) error {
 		return err
 	}
 
-	fmt.Println("Collecting feeds every %v", cmd.arguments[0])
+	fmt.Println("Collecting feeds every", cmd.arguments[0])
 	ticker := time.NewTicker(duration)
 
 	for ; ; <-ticker.C {

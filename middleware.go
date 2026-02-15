@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 )
 
 func middlewareLoggedIn(handler loggedInHandler) handler {
 	return func(s *state, cmd command) error {
 		user, err := s.db.GetUserByName(context.Background(), s.conf.CurrentUserName)
 		if err != nil {
+			fmt.Println("You must be logged in to use this command")
 			return err
 		}
 
