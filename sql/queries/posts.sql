@@ -29,4 +29,3 @@ WHERE feed_id IN (
 )
 ORDER BY posts.published_at ASC
 LIMIT $2;
-

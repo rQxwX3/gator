@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"github.com/google/uuid"
+	"github.com/lib/pq"
+	"github.com/rQxwX3/gator/internal/database"
 	"github.com/rQxwX3/gator/internal/rss"
+	"time"
 )
 
 func scrapeFeeds(s *state) error {
@@ -19,8 +22,27 @@ func scrapeFeeds(s *state) error {
 		return err
 	}
 
+	currentTime := time.Now()
+
 	for _, rssItem := range rssFeed.Channel.Item {
-		fmt.Println(rssItem.Title)
+		_, err := s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   currentTime,
+			UpdatedAt:   currentTime,
+			Title:       rssItem.Title,
+			Url:         rssItem.Link,
+			Description: rssItem.Description,
+			PublishedAt: rssItem.PubDate,
+			FeedID:      feed.ID,
+		})
+
+		if err != nil {
+			if pqErr := err.(*pq.Error); pqErr.Code == "23505" {
+				continue
+			}
+
+			return err
+		}
 	}
 
 	return nil
